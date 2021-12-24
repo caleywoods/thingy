@@ -10,9 +10,9 @@ const config = {
     },
     stateSections: [
         '201',
-        '202',
-        '203',
-        '204'
+        // '202',
+        // '203',
+        // '204'
     ]
 };
 
@@ -23,16 +23,23 @@ const config = {
 
 const stateData = new Map([
     [6, "Alabama"],
-    [7, "Alaska"],
-    [8, "Arizona"],
-    [9, "Arkansas"],
-    [10, "California"],
-    [11, "Colorado"],
-    [12, "Connecticut"],
-    [13, "Delaware"],
-    [14, "Florida"],
-    [15, "Georgia"],
+    // [7, "Alaska"],
+    // [8, "Arizona"],
+    // [9, "Arkansas"],
+    // [10, "California"],
+    // [11, "Colorado"],
+    // [12, "Connecticut"],
+    // [13, "Delaware"],
+    // [14, "Florida"],
+    // [15, "Georgia"],
 ]);
+
+const sectionMap = {
+    201: "Understanding and Finding Child Care",
+    202: "Financial Assistance For Families",
+    203: "Health & Social Services",
+    204: "Child Development & Early Living"
+};
 
 (async () => {
     const browser = await puppeteer.launch(config.puppeteer);
@@ -55,7 +62,15 @@ const stateData = new Map([
                 return sectionData;
             }, '.col-sm-6:not(.col-lg-4)');
 
-            await fs.writeFile(`${config.output_dir}/${stateName}-${sectionID}.yml`, YAML.stringify(linkSections));
+            let templateFile = await fs.readFile('template.md', {encoding: "utf8"});
+            templateFile = templateFile.replace('$permalink$', `state-resources/${stateName.toLowerCase()}-${sectionID}`);
+            templateFile = templateFile.replace('$statename$', stateName);
+            templateFile = templateFile.replace('$sectionname$',  sectionMap[sectionID]);
+
+            const yamalizedData = YAML.stringify(linkSections).replace('---', '').replace('\n','');
+            templateFile = templateFile.replace('$links$', yamalizedData);
+
+            await fs.writeFile(`${config.output_dir}/${stateName}-${sectionID}.md`, templateFile);
         }
     }
     browser.close();

@@ -62,12 +62,11 @@ const sectionMap = {
                 return sectionData;
             }, '.col-sm-6:not(.col-lg-4)');
 
+            const yamalizedData = YAML.stringify(linkSections).replace('---', '').replace('\n','');
             let templateFile = await fs.readFile('template.md', {encoding: "utf8"});
             templateFile = templateFile.replace('$permalink$', `state-resources/${stateName.toLowerCase()}-${sectionID}`);
             templateFile = templateFile.replace('$statename$', stateName);
             templateFile = templateFile.replace('$sectionname$',  sectionMap[sectionID]);
-
-            const yamalizedData = YAML.stringify(linkSections).replace('---', '').replace('\n','');
             templateFile = templateFile.replace('$links$', yamalizedData);
 
             await fs.writeFile(`${config.output_dir}/${stateName}-${sectionID}.md`, templateFile);
